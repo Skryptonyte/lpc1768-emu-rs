@@ -11,3 +11,7 @@ As of present, there's only a bare implementation of a Cortex M3 cpu with a smal
 There are three example assembly files provided which are tested to work as expected on this emulator. I have provided a wrapper script compile-lpc.sh which will compile an asm file and create obj files in cwd which will be used by the program. 
 
 Note: You will require arm-none-eabi-gcc toolchain to compile the assembly files.
+
+# References:
+
+1. https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Thumb-Instruction-Set-Encoding?lang=en
