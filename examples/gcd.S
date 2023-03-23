@@ -6,9 +6,8 @@ _start:
     mov r0, #60 // num 1
     mov r1, #100 // num 2
     mov r2, #1
-    mov r3, #0 // Designated zero register
     ldr r2, =dest
-    ldr r2, [r2,r3]
+    ldr r2, [r2]
 _loop:
     cmp r0, r1
     beq _end
@@ -21,7 +20,7 @@ lo:
     sub r1, r1, r0
     b _loop 
 _end:
-    str r0, [r2,r3]
+    str r0, [r2,#4]
 dest:
     .word 0x10000000
 

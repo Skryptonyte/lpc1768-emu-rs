@@ -314,7 +314,49 @@ impl Context
             self.x_psr &= !(1 << 31);
         }
     }
+ // T1 encoding: 0 0 1 | 0 1 | Rn (bits 10 - 8) | imm8 ( bits 7 - 0 )
+    // CMP Rn, #imm8
+    pub fn cmp_imm_thumb1_opcode(self: &mut Context, opcode: u16)
+    {
+        
+        let rn: usize = ((opcode >> 8) & 0x7) as usize;
+        let imm8: u8 = (opcode & 0xff) as u8;
+        let imm32: u32 = imm8 as u32;
 
+        println!("CMP R{},#{}",rn,imm32);
+
+        let temp: u64 = (self.r[rn] as u64) + ( (!imm32) as u64) + 1 ;
+
+        // Set C flag
+        if temp > 0xffffffff
+        {
+            self.x_psr |= 1 << 29
+        }
+        else
+        {
+            self.x_psr &= !(1 << 29);
+        }
+
+        // Set Z flag
+        if temp & 0xffffffff == 0
+        {
+            self.x_psr |= 1 << 30;
+        }
+        else
+        {
+            self.x_psr &= !(1 << 30);
+        }
+        // Set N flag
+
+        if (temp >> 31) & 1== 1
+        {
+            self.x_psr |= 1 << 31;
+        }
+        else
+        {
+            self.x_psr &= !(1 << 31);
+        }
+    }
     // T1 encoding: 0 1 0 0 0 0 | 1 0 1 0 | Rm (bits 5-3) | Rn (2-0)
     // CMP Rn, Rm
     pub fn cmp_thumb1_opcode(self: &mut Context, opcode: u16)

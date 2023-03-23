@@ -27,10 +27,10 @@ impl Context
     {
         for i in (0x10000000..0x10000100).step_by(8)
         {
-            print!("{:#08x}: {:#02x} {:#02x} {:#02x} {:#02x}",i,self.read_u8_from_mem(i),
+            print!(" {:08x}: {:02x} {:02x} {:02x} {:02x}",i,self.read_u8_from_mem(i),
             self.read_u8_from_mem(i+0x1),self.read_u8_from_mem(i+0x2),self.read_u8_from_mem(i+0x3));
 
-            println!(" {:#02x} {:#02x} {:#02x} {:#02x}",self.read_u8_from_mem(i+0x4),
+            println!(" {:02x} {:02x} {:02x} {:02x}",self.read_u8_from_mem(i+0x4),
             self.read_u8_from_mem(i+0x5),self.read_u8_from_mem(i+0x6),self.read_u8_from_mem(i+0x7));
         }
     }
@@ -52,7 +52,6 @@ impl Context
         match (thumbcode){
             0b0100001010 =>
             {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.cmp_thumb1_opcode(opcode);
                 return true;
@@ -66,25 +65,21 @@ impl Context
 
         match (thumbcode){
             0b0001100 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.adds_thumb1_opcode(opcode);
                 return true;
             }
             0b0001101 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.subs_thumb1_opcode(opcode);
                 return true;
             }
             0b0001110 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.adds_imm3_thumb1_opcode(opcode);
                 return true;
             }
             0b0001111 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.subs_imm3_thumb1_opcode(opcode);
                 return true;
@@ -99,38 +94,39 @@ impl Context
         match (thumbcode){
             // MOVS 
             0b00100 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.movs_thumb1_opcode(opcode);
                 return true;
             }
+            0b00101 =>
+            {
+                self.r[15] += 2;
+                self.cmp_imm_thumb1_opcode(opcode);
+                return true;
+            }
             // ADDS imm8
             0b00110 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.adds_imm8_thumb1_opcode(opcode);
                 return true;
             }
             // SUBS imm8
             0b00111 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.r[15] += 2;
                 self.subs_imm8_thumb1_opcode(opcode);
                 return true;
             }
-            // LDR immediate
+            // LDR immediate pool
             0b01001 =>
             {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
-                self.ldr_immediate_thumb1(opcode);
+                self.ldr_immediate_pool_thumb1(opcode);
                 self.r[15] += 2;
 
                 return true;
             }
-            // Branch allways
+            // Branch always
             0b11100 =>
             {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.branch_t2_opcode(opcode);
                 return true;
             }
@@ -145,14 +141,26 @@ impl Context
             // Load/Store wrapper
             0b0101 =>
             {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.loadstore_register_thumb1(opcode);
                 self.r[15] += 2;
                 return true; 
             }
+            // Load/Store immediate wrappers
+            0b0110 =>
+            {
+                self.loadstore_imm_thumb1(opcode);
+                self.r[15] += 2;
+                return true;   
+            }
+            // Load/Store byte immediate wrappers
+            0b0111 =>
+            {
+                self.loadstore_byte_imm_thumb1(opcode);
+                self.r[15] += 2;
+                return true;   
+            }
             // Branch wrapper
             0b1101 => {
-                let opcode: u16 = (code[pc+1] as u16)<< 8 | (code[pc] as u16);
                 self.branch_t1_opcode(opcode);
                 return true;
             }

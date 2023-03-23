@@ -10,10 +10,10 @@ impl Context
             0x10000000..=0x10008000 =>
             {
                 let index: usize = (addr-0x10000000) as usize;
-                let mut val: u32 = self.code[index+3] as u32;
-                val = val << 8 | ((self.code[index+2] & 0xff) as u32);
-                val = val << 8 | ((self.code[index+1] & 0xff) as u32);
-                val = val << 8 | ((self.code[index] & 0xff) as u32);
+                let mut val: u32 = self.data[index+3] as u32;
+                val = val << 8 | ((self.data[index+2] & 0xff) as u32);
+                val = val << 8 | ((self.data[index+1] & 0xff) as u32);
+                val = val << 8 | ((self.data[index] & 0xff) as u32);
 
                 return val;
             }
@@ -50,6 +50,48 @@ impl Context
             }
         }
     }
+
+    pub fn read_u16_from_mem(self: &mut Context, addr: u32) -> u16
+    {
+        match (addr)
+        {
+            0x10000000..=0x10008000 =>
+            {
+                let index: usize = (addr-0x10000000) as usize;
+                let mut val: u16 = self.data[index+1] as u16;
+                val = val << 8 | ((self.data[index] & 0xff) as u16);
+
+                return val;
+            }
+            0x00000000..=0x00080000 =>
+            {
+                let index: usize = (addr) as usize;
+                let mut val: u16 = self.code[index+1] as u16;
+                val = val << 8 | ((self.code[index+0] & 0xff) as u16);
+                return val;
+            }
+            _ =>
+            {
+                return 0;
+            }
+        }
+    }
+    pub fn write_u16_to_mem(self: &mut Context, val: u16, addr: u32)
+    {
+        match(addr)
+        {
+            0x10000000..=0x10008000 =>
+            {
+                let index: usize = (addr-0x10000000) as usize;
+                self.data[index] = (val & 0xff) as u8;
+                self.data[index+1] = ((val>>8) & 0xff) as u8;
+            }
+            _ =>
+            {
+                println!("[WARN] No write permissions for address: {:#08x}",addr);
+            }
+        }
+    }
     pub fn write_u8_to_mem(self: &mut Context, val: u8, addr: u32)
     {
         match(addr)
@@ -61,7 +103,7 @@ impl Context
             }
             _ =>
             {
-
+                println!("[WARN] No write permissions for address: {:#08x}",addr);
             }
         }
     }
